@@ -278,16 +278,52 @@ function resetPrintState() {
 
 function initCvDownload() {
     document.querySelectorAll('.btn-download-cv').forEach((button) => {
-        button.addEventListener('click', () => {
+        button.addEventListener('click', async () => {
+            const cvElem = document.getElementById('cv-print');
+            if (!cvElem) return;
+
             prepareForPrint();
             document.body.classList.add('is-printing-cv');
 
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    fitCvToOnePage();
+            // Create a clean clone to render for PDF to avoid on-screen layout issues
+            const cloneWrapper = document.createElement('div');
+            cloneWrapper.style.position = 'fixed';
+            cloneWrapper.style.left = '-9999px';
+            cloneWrapper.style.top = '0';
+            cloneWrapper.setAttribute('aria-hidden', 'true');
+
+            const clone = cvElem.cloneNode(true);
+            clone.classList.add('pdf-ready');
+            cloneWrapper.appendChild(clone);
+            document.body.appendChild(cloneWrapper);
+
+            // Ensure clone has A4 dimensions
+            clone.style.width = '210mm';
+            clone.style.boxSizing = 'border-box';
+
+            if (window.html2pdf) {
+                const opt = {
+                    margin: [8, 8, 8, 8],
+                    filename: 'Adnane_Nazih_Katim_CV.pdf',
+                    image: { type: 'jpeg', quality: 0.95 },
+                    html2canvas: { scale: Math.min(2, window.devicePixelRatio || 1), useCORS: true, logging: false },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                    pagebreak: { mode: ['css', 'legacy'] }
+                };
+
+                try {
+                    await html2pdf().set(opt).from(clone).save();
+                } catch (err) {
+                    console.error('PDF generation failed, falling back to print', err);
                     window.print();
-                });
-            });
+                }
+            } else {
+                window.print();
+            }
+
+            // Cleanup
+            document.body.removeChild(cloneWrapper);
+            resetPrintState();
         });
     });
 

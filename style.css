@@ -778,6 +778,64 @@ button.btn { appearance: none; }
     transform: translateY(0);
 }
 
+/* Print / PDF helpers to keep CV content within A4 and avoid awkward breaks */
+.is-printing-cv #cv-print {
+    width: 210mm;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.is-printing-cv .cv-job,
+.is-printing-cv .cv-block,
+.is-printing-cv .cv-header,
+.is-printing-cv .cv-profile {
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+@media print {
+    #cv-print { width: 210mm; box-sizing: border-box; }
+    .cv-job, .cv-block, .cv-header, .cv-profile { page-break-inside: avoid; break-inside: avoid; }
+}
+
+/* PDF-specific safe layout when generating via html2pdf */
+.pdf-ready {
+    width: 210mm !important;
+    padding: 8mm !important;
+    box-sizing: border-box !important;
+    background: #ffffff !important;
+    color: var(--text) !important;
+    font-size: 12px !important;
+}
+
+.pdf-ready .cv-header {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 8px !important;
+    align-items: center !important;
+}
+
+.pdf-ready .cv-header-brand > div h1 { font-size: 18px !important; }
+.pdf-ready .cv-header-brand .cv-mark { display: inline-block; width: 44px; height: 44px; font-size: 14px; }
+
+/* Make CV single-column for PDF to avoid sidebar overflow */
+.pdf-ready .cv-body { display: block !important; }
+.pdf-ready .cv-sidebar { display: block !important; width: 100% !important; margin-top: 8px !important; }
+.pdf-ready .cv-experience { width: 100% !important; }
+
+/* Reduce spacing to fit more content per page */
+.pdf-ready .cv-job { margin-bottom: 6px !important; padding-bottom: 6px !important; }
+.pdf-ready .cv-job-head time { display: inline-block; width: 72px; }
+
+/* Ensure no elements use transforms or absolute positioning */
+.pdf-ready * { transform: none !important; position: static !important; }
+
+/* Page break hints */
+.pdf-ready .cv-job, .pdf-ready .cv-block, .pdf-ready .cv-header, .pdf-ready .cv-profile { page-break-inside: avoid; break-inside: avoid; }
+
+/* Images and SVGs scale to container */
+.pdf-ready img, .pdf-ready svg { max-width: 100% !important; height: auto !important; }
+
 /* Mobile */
 @media (max-width: 960px) {
     .mobile-header {
